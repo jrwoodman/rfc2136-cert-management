@@ -1,0 +1,70 @@
+#!/bin/bash
+
+## Configuration options
+
+CERTREPO=/opt/certificates
+DELAY=3
+
+## Script execution
+## Uncomment modules as necessary for the servers indicated
+
+## Apache2
+
+#/usr/bin/systemctl restart apache2
+#sleep ${DELAY}
+
+## audiobookshelf
+
+#/usr/bin/systemctl restart audiobookshelf
+#sleep ${DELAY}
+
+## calibreweb
+
+#/usr/bin/systemctl restart calibreweb
+#sleep ${DELAY}
+
+## Courier
+
+#/usr/local/systemctl restart courier-imap
+#/usr/local/systemctl restart courier-imap-ssl
+#/usr/local/systemctl restart courier-pop
+#/usr/local/systemctl restart courier-pop-ssl
+#sleep ${DELAY}
+
+## Dovecot
+
+#/usr/bin/systemctl restart dovecot
+#sleep ${DELAY}
+
+## Lidarr
+
+#/usr/bin/systemctl restart lidarr
+#sleep ${DELAY}
+
+## Postfix
+
+#/usr/bin/systemctl restart postfix
+#sleep ${DELAY}
+
+## Radarr
+
+#/usr/bin/systemctl restart radarr
+#sleep ${DELAY}
+
+## sabnzbdplus
+
+#/usr/bin/systemctl restart sabnzbdplus
+#sleep ${DELAY}
+
+## Sonarr -- Replace <SONARR_USER> with the username Sonarr runs under
+
+#/usr/bin/sudo -u <SONARR_USER> /usr/bin/httpcfg -del -port 9898
+#/usr/bin/sudo -u <SONARR_USER> /usr/bin/httpcfg -add -port 9898 -p12 "${CERTREPO}"/bluecows.com/bluecows.com.p12
+#/usr/bin/systemctl restart sonarr
+#sleep ${DELAY}
+
+## ADD ADDITIONAL CUSTOM MODULES BELOW ##
+
+## END ADDITIONAL MODULES ##
+
+exit 0

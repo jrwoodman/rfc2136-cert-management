@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## Configuration options
+## VMSERVERS is a space-separated list of hosts
+
+CERTREPO=/opt/certificates
+VMSERVERS="your.hostname.here second.hostname.here"
+VMUSER="vmware_server_username"
+
+## Script execution
+
+for SERVER in ${VMSERVERS}; do
+
+    DOMAIN=$(echo ${SERVER} | rev | cut -d'.' -f1,2 | rev)
+    HOSTNAME=$(echo ${SERVER} | rev | cut -d'.' -f3- | rev)
+
+    /usr/bin/scp ${CERTREPO}/${DOMAIN}/*.pem ${VMUSER}@${SERVER}.${DOMAIN}:
+    /usr/bin/ssh ${VMUSER}@${SERVER} ./esxi_update_ui_cert
+    sleep 5
+
+done
+
+exit 0

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+/bin/cp ./cert.pem /etc/vmware/ssl/rui.crt
+/bin/cp ./privkey.pem /etc/vmware/ssl/rui.key
+
+/etc/init.d/hostd restart
+
+/bin/rm -f ./*.pem
+
+exit 0

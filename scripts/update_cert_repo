@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## Configuration options
+
+CERTREPO=/opt/certificates
+
+## Script execution
+
+GIT=$(which git)
+CHMOD=$(which chmod)
+
+if [ -z ${GIT} ]; then
+  echo -e "\nCan't find git command, aborting.\n"
+  exit 1
+fi
+
+## Update the certificate repo, run from cron or systemd timer
+
+cd "${CERTREPO}"
+${GIT} pull
+${CHMOD} 0444 "${CERTREPO}"/*/*.pem
+
+exit 0

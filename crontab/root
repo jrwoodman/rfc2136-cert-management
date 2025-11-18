@@ -1,0 +1,10 @@
+# Update certificate repository on the local (this) machine
+0 3 * * 5 /usr/local/bin/update_cert_repo
+
+# Update certificates and restart services on the local (this) machine
+0 5 * * 5 /usr/local/bin/update_certificates
+
+# Update certificates on VMware ESXi hosts and restart WebUI
+# Requires ../scripts/esxi_cert_update script installed on ESXi host
+# in user's home directory.
+0 5 * * 5 /usr/local/bin/update_vmware_certs

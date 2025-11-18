@@ -1,0 +1,82 @@
+#!/bin/bash
+
+CERTREPO=/opt/certificates
+LETSENCRYPT=/etc/letsencrypt/live
+RFC2136CFG=/etc/letsencrypt/rfc2136.ini
+
+if [ -z "${1}" ]; then
+  echo -e "Enter domain to fetch certificate for: \c"
+  read DOMAIN
+else
+  DOMAIN="${1}"
+fi
+
+if [ -z "${DOMAIN}" ]; then
+  echo "\nPlease enter a domain.\n"
+  exit 1
+fi
+
+# Request certificate
+
+if [ -z $(which certbot) ]; then
+  echo "\nCan't find certbot command. Aborting.\n"
+  exit 2
+else
+  /usr/bin/certbot certonly \
+    --dns-rfc2136 \
+    --dns-rfc2136-credentials "${RFC2136CFG}" \
+    --key-type rsa \
+    -d "${DOMAIN}" \
+    -d "*.${DOMAIN}"
+fi
+
+# Copy certificate to git repository
+
+/bin/cp -Lr "${LETSENCRYPT}"/"${DOMAIN}" ${CERTREPO}/
+
+# Generate PKCS12 certificate for domain
+
+OPENSSL=$(which openssl)
+
+if [ ! -x ${OPENSSL} ]; then
+  echo "\nCan't find openssl command, skipping PKCS12 generation.\n"
+else
+  ${OPENSSL} pkcs12 -legacy \
+    -in "${CERTREPO}"/"${DOMAIN}"/cert.pem \
+    -certfile "${CERTREPO}"/"${DOMAIN}"/chain.pem \
+    -inkey "${CERTREPO}"/"${DOMAIN}"/privkey.pem \
+    -export -password pass: -out "${CERTREPO}"/"${DOMAIN}"/"${DOMAIN}".p12    
+fi
+
+# Generate JKS certifcate keystore for domain
+
+KEYTOOL=$(which keytool)
+
+if [ ! -x ${KEYTOOL} ]; then
+  echo -e "\nCan't find keytool command, skipping JKS generation.\n"
+else
+  echo -e "Enter JKS password (mandatory, defaults to domain): \c"
+  read JKSPASS
+  echo -e "Enter JKS alias (optional): \c"
+  read JKSALIAS
+  if [ -z "${JKS}" ]; then
+    echo -e "\nNo password supplied, assuming no password\n"
+    JKS=""
+  fi
+  KEYTOOLCMD=${KEYTOOL} -importkeystore \
+    -srckeystore ${CERTREPO}/${DOMAIN}/${DOMAIN}.p12 \
+    -srcstoretype pkcs12 \
+    -destkeystore ${CERTREPO}/${DOMAIN}/${DOMAIN}.jks \
+    -deststoretype jks
+  if [ ! -z ${JKSPASS} ]; then
+    KEYTOOLCMD="${KEYTOOLCMD} -deststorepass ${JKSPASS}"
+  else
+    KEYTOOLCMD="${KEYTOOLCMD} -deststorepass ${DOMAIN}"
+  fi
+  if [ ! -z ${JKSALIAS} ]; then
+    KEYTOOLCMD="${KEYTOOLCMD} -destalias ${JKSALIAS}"
+  fi
+  ${KEYTOOLCMD}
+fi
+
+exit 0
