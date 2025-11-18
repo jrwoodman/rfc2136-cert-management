@@ -89,6 +89,51 @@ sudo vi /usr/local/bin/update_vmware_certs
 scp scripts/esxi_update_ui_cert root@your-esxi-host:~/
 ```
 
+## Philosophy
+
+This certificate management system is designed around a simple principle: **centralize certificate storage and use symlinks for distribution**.
+
+Instead of copying certificates to multiple locations or configuring each service with different certificate paths, we recommend:
+
+1. **Central Repository**: Keep all certificates in `/opt/certificates/` (or your chosen central location)
+2. **Symlink to Services**: Create symbolic links from service configuration directories to the central repository
+3. **Automatic Updates**: When certificates renew, all services automatically use the updated certificates through symlinks
+4. **Simple Restarts**: The `update_certs` script only needs to restart services, not copy files
+
+### Example Symlink Approach
+
+```bash
+# Apache/nginx
+ln -sf /opt/certificates/example.com/fullchain.pem /etc/ssl/certs/example.com.crt
+ln -sf /opt/certificates/example.com/privkey.pem /etc/ssl/private/example.com.key
+
+# Postfix
+ln -sf /opt/certificates/example.com/fullchain.pem /etc/postfix/ssl/cert.pem
+ln -sf /opt/certificates/example.com/privkey.pem /etc/postfix/ssl/key.pem
+
+# Dovecot
+ln -sf /opt/certificates/example.com/fullchain.pem /etc/dovecot/ssl/cert.pem
+ln -sf /opt/certificates/example.com/privkey.pem /etc/dovecot/ssl/key.pem
+```
+
+### Benefits of This Approach
+
+- **No file copying needed**: Certificates update in-place when renewed
+- **Consistent certificate locations**: All services reference the same source
+- **Simplified automation**: The cron jobs handle updates automatically
+- **Version control friendly**: The git repository tracks all certificate changes
+- **Easy troubleshooting**: One location to check for certificate issues
+- **Atomic updates**: Symlinks mean services always see complete, valid certificates
+
+### Alternative Approaches
+
+If symlinks aren't suitable for your environment (e.g., services running in containers, remote hosts, or systems with symlink restrictions), you can:
+- Modify `update_certs` to copy certificates to required locations
+- Use the VMware integration pattern for remote deployment
+- Implement custom deployment scripts based on your needs
+
+The key is maintaining `/opt/certificates/` as your authoritative certificate source.
+
 ## Configuration
 
 ### Certificate Repository Path
@@ -116,7 +161,6 @@ Supported services include:
 - Courier (IMAP/POP)
 - Dovecot
 - Lidarr
-- nginx
 - Postfix
 - Radarr
 - sabnzbdplus
@@ -288,6 +332,10 @@ Contributions are welcome! Please submit pull requests or open issues for:
 - Bug fixes
 - Documentation improvements
 - New features
+
+## License
+
+[Include your license information here]
 
 ## Support
 
