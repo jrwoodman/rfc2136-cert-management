@@ -116,6 +116,7 @@ Supported services include:
 - Courier (IMAP/POP)
 - Dovecot
 - Lidarr
+- nginx
 - Postfix
 - Radarr
 - sabnzbdplus
