@@ -41,6 +41,10 @@ DELAY=3
 #/usr/bin/systemctl restart lidarr
 #sleep ${DELAY}
 
+## nginx
+#/usr/bin/systemctl restart nginx
+#sleep ${DELAY}
+
 ## Postfix
 
 #/usr/bin/systemctl restart postfix
